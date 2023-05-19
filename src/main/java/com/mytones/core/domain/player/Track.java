@@ -30,7 +30,14 @@ public class Track extends File {
     @ManyToOne(fetch = FetchType.LAZY)
     private Album album;
 
+    private Long duration;
+
     public void addArtist(Artist artistProfile) {
         artists.add(artistProfile);
+    }
+
+    @Override
+    public String bucket() {
+        return "tracks";
     }
 }

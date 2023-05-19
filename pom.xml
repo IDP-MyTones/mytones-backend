@@ -48,7 +48,7 @@
 
         <dependency>
             <groupId>com.github.paulcwarren</groupId>
-            <artifactId>spring-content-fs-boot-starter</artifactId>
+            <artifactId>spring-content-s3-boot-starter</artifactId>
             <version>${spring-content.version}</version>
         </dependency>
 

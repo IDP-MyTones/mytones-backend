@@ -17,11 +17,18 @@ public class TrackDto {
     private String name;
     private List<SimpleArtistDto> artists;
     private Long albumId;
+    private String imageUrl;
+    private String url;
+    private Long duration;
+    private Boolean inFavorites;
 
     public TrackDto(Track track) {
         this.id = track.getId();
         this.name = track.getName();
         this.artists = track.getArtists().stream().map(SimpleArtistDto::new).toList();
         this.albumId = track.getAlbum().getId();
+        this.url = track.getUrl();
+        this.duration = track.getDuration();
+        this.imageUrl = track.getAlbum().getImageUrl();
     }
 }

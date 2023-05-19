@@ -10,7 +10,6 @@ import java.util.List;
 
 @JsonIgnoreProperties(value = {"id", "image", "tracks"}, allowGetters = true)
 public record AlbumDto(Long id,
-                       Album.Type type,
                        String name,
                        LocalDate releaseDate,
                        FileDto image,

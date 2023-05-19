@@ -18,9 +18,8 @@ public class Artist extends AbstractPersistable<Long> {
     @Column(name = "NAME", nullable = false)
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "IMAGE_ID")
-    private ImageFile image;
+    @Column(name = "IMAGE_URL")
+    private String imageUrl;
 
     @Column(name = "DESCRIPTION", columnDefinition = "TEXT")
     private String description;

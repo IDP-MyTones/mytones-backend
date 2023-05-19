@@ -10,4 +10,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ImageFile extends File {
+    @Override
+    public String bucket() {
+        return "images";
+    }
 }

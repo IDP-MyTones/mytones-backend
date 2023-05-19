@@ -22,9 +22,7 @@ class AdminController {
 
     @GetMapping("/users")
     public List<SimpleUserDto> findAllUsers() {
-        return userRepository.findAll().stream()
-                .map(SimpleUserDto::new)
-                .toList();
+        return userRepository.findAll().stream().map(SimpleUserDto::new).toList();
     }
 
     @PutMapping("/users/{userId}/role")

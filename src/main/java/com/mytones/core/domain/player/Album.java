@@ -18,19 +18,15 @@ import java.util.Objects;
 @Setter
 public class Album extends AbstractPersistable<Long> {
 
-    @Enumerated(EnumType.STRING)
-    private Type type;
-
     @Column(name = "NAME")
     private String name;
 
-    @Column(name = "RELEASE_DATE")
-    @Temporal(TemporalType.DATE)
-    private LocalDate releaseDate;
+//    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+//    @JoinColumn(name = "IMAGE_ID")
+//    private ImageFile image;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "IMAGE_ID")
-    private ImageFile image;
+    @Column(name = "IMAGE_URL")
+    private String imageUrl;
 
     @ManyToMany
     @OrderColumn(name = "ARTIST_INDEX")
@@ -43,10 +39,6 @@ public class Album extends AbstractPersistable<Long> {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Track> tracks = new ArrayList<>();
-
-    public enum Type {
-        SINGLE, EP, ALBUM
-    }
 
     public void removeTrack(Track track) {
         if (track.getAlbum() == this) {
