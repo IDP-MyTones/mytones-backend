@@ -1,46 +1,65 @@
 package com.mytones.core.config;
 
-import org.springframework.content.fs.config.EnableFilesystemStores;
-import org.springframework.content.fs.config.FilesystemStoreConfigurer;
-import org.springframework.content.fs.io.FileSystemResourceLoader;
+import com.mytones.core.domain.file.File;
+import com.mytones.core.domain.player.Artist;
+import org.springframework.content.s3.S3ObjectId;
+import org.springframework.content.s3.config.EnableS3Stores;
+import org.springframework.content.s3.config.S3StoreConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 @Configuration
-@EnableFilesystemStores(basePackages = "com.mytones.core..storage")
+@EnableS3Stores(basePackages = "com.mytones.core..storage")
 public class StorageConfiguration {
+
     @Bean
-    File filesystemRoot() throws IOException {
-        return Files.createDirectories(Paths.get(".storage")).toFile();
+    public S3Client s3Client(AwsCredentialsProvider awsCredentialsProvider) throws URISyntaxException {
+
+        return S3Client.builder()
+                .credentialsProvider(awsCredentialsProvider)
+                .endpointOverride(new URI("http://localhost:9000"))
+                .region(Region.US_EAST_1)
+                .build();
     }
 
     @Bean
-    FileSystemResourceLoader fileSystemResourceLoader() throws IOException {
-        return new FileSystemResourceLoader(filesystemRoot().getAbsolutePath());
+    public AwsCredentialsProvider awsCredentialsProvider() {
+        final var credentials = AwsBasicCredentials.create("foTSnWtOkQGVGBJG", "ckrFiWZxTsi9c2ay6tJvdTeI6IP3ehjO");
+
+        return () -> credentials;
     }
 
     @Bean
-    FilesystemStoreConfigurer configurer() {
-        return new FilesystemStoreConfigurer() {
+    public S3StoreConfigurer configurer() {
+        return new S3StoreConfigurer() {
 
             @Override
-            public void configureFilesystemStoreConverters(ConverterRegistry registry) {
-                registry.addConverter(new Converter<com.mytones.core.domain.file.File, String>() {
-
+            public void configureS3StoreConverters(ConverterRegistry registry) {
+                registry.addConverter(new Converter<File, S3ObjectId>() {
                     @Override
-                    public String convert(com.mytones.core.domain.file.File file) {
-                        return file.getClass().getSimpleName() + "-" + file.getId() + "-" + file.getName();
+                    public S3ObjectId convert(File entity) {
+                        return new S3ObjectId(entity.bucket(), entity.getName());
+                    }
+                });
+
+                registry.addConverter(new Converter<Artist, S3ObjectId>() {
+                    @Override
+                    public S3ObjectId convert(Artist source) {
+                        return new S3ObjectId("images", "artist-" + source.getId());
                     }
                 });
             }
         };
     }
+
 
 }

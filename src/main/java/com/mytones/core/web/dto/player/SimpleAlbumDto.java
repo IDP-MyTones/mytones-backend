@@ -3,6 +3,7 @@ package com.mytones.core.web.dto.player;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.mytones.core.domain.player.Album;
 import com.mytones.core.domain.player.Artist;
+import com.mytones.core.web.dto.artist.SimpleArtistDto;
 import com.mytones.core.web.dto.file.FileDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,22 +19,14 @@ import java.util.List;
 @NoArgsConstructor
 public class SimpleAlbumDto {
     private Long id;
-    private Album.Type type;
     private String name;
-    private LocalDate releaseDate;
-    private List<Long> artists;
-    private FileDto image;
+    private List<SimpleArtistDto> artists;
+    private String imageUrl;
 
     public SimpleAlbumDto(Album album) {
         this.id = album.getId();
-        this.type = album.getType();
         this.name = album.getName();
-        this.releaseDate = album.getReleaseDate();
-        this.artists = album.getArtists().stream().map(Artist::getId).toList();
-
-        if (album.getImage() != null) {
-            image = new FileDto();
-            image.setId(album.getImage().getId());
-        }
+        this.artists = album.getArtists().stream().map(SimpleArtistDto::new).toList();
+        this.imageUrl = album.getImageUrl();
     }
 }

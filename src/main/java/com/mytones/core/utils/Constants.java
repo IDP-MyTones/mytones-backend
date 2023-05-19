@@ -7,4 +7,6 @@ import lombok.NoArgsConstructor;
 public final class Constants {
 
     public static final String BASE_URL = "/api/v1";
+
+    public static final String FAVORITES_PLAYLIST_KEY = "__USER__FAVORITES__";
 }

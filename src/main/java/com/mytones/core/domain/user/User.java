@@ -33,17 +33,9 @@ public class User extends AbstractPersistable<Long> {
     @Column(name = "LAST_NAME")
     private String lastName;
 
-    @Column(name = "BIRTHDAY")
-    @Temporal(TemporalType.DATE)
-    private LocalDate birthday;
-
     @Column(name = "ROLE")
     @Enumerated(EnumType.STRING)
     private Role role = Role.CLIENT;
-
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "IMAGE_ID")
-    private ImageFile image;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Playlist> playlists = new ArrayList<>();

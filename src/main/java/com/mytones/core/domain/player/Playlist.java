@@ -1,6 +1,5 @@
 package com.mytones.core.domain.player;
 
-import com.mytones.core.domain.file.ImageFile;
 import com.mytones.core.domain.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -19,12 +18,11 @@ public class Playlist extends AbstractPersistable<Long> {
     @Column(name = "NAME")
     private String name;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "IMAGE_ID")
-    private ImageFile image;
+    @Column(name = "IMAGE_URL")
+    private String imageUrl;
 
     @ManyToMany
-    @OrderColumn(name = "ARTIST_INDEX")
+    @OrderColumn(name = "TRACK_INDEX")
     @JoinTable(
             name = "PLAYLIST_TRACKS",
             joinColumns = @JoinColumn(name = "PLAYLIST_ID"),

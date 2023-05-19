@@ -1,24 +1,21 @@
 package com.mytones.core.web.controller.player;
 
-import com.mytones.core.domain.file.ImageFile;
 import com.mytones.core.domain.player.Playlist;
-import com.mytones.core.repository.file.ImageRepository;
 import com.mytones.core.repository.player.PlaylistRepository;
 import com.mytones.core.repository.player.TrackRepository;
 import com.mytones.core.security.CurrentUserHolder;
-import com.mytones.core.storage.FileStore;
+import com.mytones.core.storage.StorageUtils;
 import com.mytones.core.utils.Constants;
 import com.mytones.core.web.dto.player.PlaylistDto;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.ws.rs.NotFoundException;
 
-import java.io.IOException;
-import java.util.Set;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(Constants.BASE_URL + "/playlists")
@@ -27,14 +24,17 @@ class PlaylistController {
 
     private final PlaylistRepository playlistRepository;
     private final TrackRepository trackRepository;
-    private final ImageRepository imageRepository;
-    private final FileStore fileStore;
     private final CurrentUserHolder currentUserHolder;
+    private final StorageUtils storageUtils;
 
     @GetMapping("/{id}")
     @Transactional
     public PlaylistDto get(@PathVariable long id) {
         var playlist = playlistRepository.findById(id).orElseThrow(() -> new NotFoundException("Playlist not found"));
+
+        if (Constants.FAVORITES_PLAYLIST_KEY.equals(playlist.getName()) || !playlist.getUser().equals(currentUserHolder.get())) {
+            throw new NotFoundException();
+        }
 
         return new PlaylistDto(playlist);
     }
@@ -42,7 +42,6 @@ class PlaylistController {
     @PostMapping
     @Transactional
     public Long create(@RequestBody String name) {
-
         var playlist = new Playlist();
         playlist.setName(name);
         currentUserHolder.get().addPlaylist(playlist);
@@ -55,55 +54,95 @@ class PlaylistController {
     @Transactional
     public void delete(@PathVariable long id) {
         var playlist = playlistRepository.findById(id).orElseThrow(() -> new NotFoundException("Playlist not found"));
-        if (playlist.getImage() != null) {
-            fileStore.unassociate(playlist.getImage());
+
+        if (Constants.FAVORITES_PLAYLIST_KEY.equals(playlist.getName()) || !playlist.getUser().equals(currentUserHolder.get())) {
+            throw new NotFoundException();
         }
+
         currentUserHolder.get().removePlaylist(playlist);
     }
 
     @PutMapping("/{id}")
     @Transactional
     public void update(@PathVariable long id, @RequestBody String name) {
-        playlistRepository.findById(id).ifPresent(playlist -> playlist.setName(name));
+        Playlist playlist = playlistRepository.findById(id).orElseThrow(NotFoundException::new);
+        if (Constants.FAVORITES_PLAYLIST_KEY.equals(playlist.getName()) || !playlist.getUser().equals(currentUserHolder.get())) {
+            throw new NotFoundException();
+        }
+
+        playlist.setName(name);
+        playlistRepository.save(playlist);
     }
 
     @PutMapping("/{id}/image")
     @Transactional
-    public void updateImage(@PathVariable long id, @RequestPart MultipartFile image) {
-        var playlist = playlistRepository.findById(id).orElseThrow(() -> new NotFoundException("Playlist not found"));
-        if (playlist.getImage() != null) {
-            fileStore.unassociate(playlist.getImage());
-            imageRepository.delete(playlist.getImage());
+    public void updateImage(@PathVariable long id, @RequestBody String content) {
+        Playlist playlist = playlistRepository.findById(id).orElseThrow(NotFoundException::new);
+        if (Constants.FAVORITES_PLAYLIST_KEY.equals(playlist.getName()) || !playlist.getUser().equals(currentUserHolder.get())) {
+            throw new NotFoundException();
         }
 
-        final var imageFile = new ImageFile();
-        try {
-            imageFile.setContent(image.getInputStream());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        imageFile.setName(image.getName());
-        imageRepository.save(imageFile);
-        fileStore.setContent(imageFile, imageFile.getContent());
-
-        playlist.setImage(imageFile);
+        storageUtils.uploadPlaylistImage(playlist, content);
+        playlistRepository.save(playlist);
     }
 
 
-    @PutMapping("/{id}/tracks")
+    @PostMapping("/{playlistId}/tracks/{trackId}")
     @Transactional
-    public void addTracks(@PathVariable long id, @RequestBody Set<Long> trackIds) {
-        var playlist = playlistRepository.findById(id).orElseThrow(() -> new NotFoundException("Playlist not found"));
-        final var tracks = trackRepository.findAllById(trackIds);
-        playlist.getTracks().addAll(tracks);
+    public void addTrack(@PathVariable long playlistId, @PathVariable long trackId) {
+        final var playlist = playlistRepository.findById(playlistId).orElseThrow(NotFoundException::new);
+        if (Constants.FAVORITES_PLAYLIST_KEY.equals(playlist.getName()) || !playlist.getUser().equals(currentUserHolder.get())) {
+            throw new NotFoundException();
+        }
+
+        final var track = trackRepository.findById(trackId).orElseThrow(NotFoundException::new);
+        playlist.getTracks().add(track);
 
         playlistRepository.save(playlist);
     }
 
-    @DeleteMapping("/{id}/tracks")
+    @DeleteMapping("/{playlistId}/tracks/{trackId}")
     @Transactional
-    public void deleteTracks(@PathVariable long id, @RequestBody Set<Long> trackIds) {
-        var playlist = playlistRepository.findById(id).orElseThrow(() -> new NotFoundException("Playlist not found"));
-        CollectionUtils.filter(playlist.getTracks(), track -> !trackIds.contains(track.getId()));
+    public void deleteTracks(@PathVariable long playlistId, @PathVariable long trackId) {
+        final var playlist = playlistRepository.findById(playlistId).orElseThrow(NotFoundException::new);
+        if (Constants.FAVORITES_PLAYLIST_KEY.equals(playlist.getName()) || !playlist.getUser().equals(currentUserHolder.get())) {
+            throw new NotFoundException();
+        }
+
+        playlist.getTracks().removeIf(t -> Objects.equals(t.getId(), trackId));
+
+        playlistRepository.save(playlist);
+    }
+
+    @GetMapping("/search")
+    public List<PlaylistDto> search(@RequestParam String value) {
+        return playlistRepository.findAllByNameLikeAndUserId("%" + value + "%", currentUserHolder.get().getId())
+                .stream().map(PlaylistDto::new)
+                .toList();
+    }
+
+    @PostMapping("/favorites/{trackId}")
+    @Transactional
+    public void addToFavorites(@PathVariable Long trackId) {
+        var playlist = playlistRepository.findAllByNameLikeAndUserId( Constants.FAVORITES_PLAYLIST_KEY, currentUserHolder.get().getId()).get(0);
+        var track = trackRepository.findById(trackId).orElseThrow(NotFoundException::new);
+
+        playlist.getTracks().add(track);
+        playlistRepository.save(playlist);
+    }
+
+
+    @DeleteMapping("/favorites/{trackId}")
+    @Transactional
+    public void removeFromFavorites(@PathVariable Long trackId) {
+        var playlist = playlistRepository.findAllByNameLikeAndUserId( Constants.FAVORITES_PLAYLIST_KEY, currentUserHolder.get().getId()).get(0);
+
+        playlist.setTracks(
+                playlist.getTracks().stream()
+                        .filter(track -> !Objects.equals(track.getId(), trackId))
+                        .collect(Collectors.toList())
+        );
+
+        playlistRepository.save(playlist);
     }
 }

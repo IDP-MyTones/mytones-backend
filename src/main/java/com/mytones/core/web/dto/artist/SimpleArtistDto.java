@@ -13,7 +13,8 @@ public record SimpleArtistDto(Long id, @Nonnull String name, @Nonnull String des
                 artist.getId(),
                 artist.getName(),
                 artist.getDescription(),
-                artist.getImage() == null ? null : artist.getImage().getId()
+                null
+//                artist.getImage() == null ? null : artist.getImage().getId()
         );
     }
 }
