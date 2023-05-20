@@ -16,15 +16,13 @@ public class UserService {
 
     private final PlaylistRepository playlistRepository;
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public User createUser(String username, String firstName, String lastName, String password) {
+    public synchronized User createUser(String username, String firstName, String lastName) {
         final var user = new User();
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(password));
 
         userRepository.save(user);
 

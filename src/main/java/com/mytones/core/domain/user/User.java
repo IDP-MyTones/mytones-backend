@@ -1,6 +1,5 @@
 package com.mytones.core.domain.user;
 
-import com.mytones.core.domain.file.ImageFile;
 import com.mytones.core.domain.player.Playlist;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -9,13 +8,12 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.annotations.NaturalId;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "USERS")
+@Table(name = "CLIENTS")
 @Getter
 @Setter
 public class User extends AbstractPersistable<Long> {
@@ -24,18 +22,11 @@ public class User extends AbstractPersistable<Long> {
     @Column(name = "USERNAME", nullable = false, unique = true)
     private String username; // email address
 
-    @Column(name = "PASSWORD", length = 1000, nullable = false)
-    private String password; // hash
-
     @Column(name = "FIRST_NAME")
     private String firstName;
 
     @Column(name = "LAST_NAME")
     private String lastName;
-
-    @Column(name = "ROLE")
-    @Enumerated(EnumType.STRING)
-    private Role role = Role.CLIENT;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Playlist> playlists = new ArrayList<>();

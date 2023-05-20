@@ -6,7 +6,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Base64;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -22,6 +21,12 @@ public class SecurityUtils {
                     if (authentication.getPrincipal() instanceof final String authenticationPrincipal) {
                         return authenticationPrincipal;
                     }
+                    if (authentication.getPrincipal() instanceof final User user) {
+                        return user.getUsername();
+                    }
+                    if (authentication.getPrincipal() instanceof final TokenValidator.UserDto user) {
+                        return user.getUsername();
+                    }
                     return null;
                 });
     }
@@ -34,11 +39,6 @@ public class SecurityUtils {
     public static boolean isCurrentUserInRole(final String role) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null && getAuthorities(authentication).anyMatch(role::equalsIgnoreCase);
-    }
-
-    public static String generateToken(User user) {
-        var jwt = new JWT(new UserDetailsServiceImpl.UserDetailsImpl(user));
-        return jwt.compact();
     }
 
     private static Stream<String> getAuthorities(final Authentication authentication) {

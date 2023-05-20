@@ -28,12 +28,12 @@ class UserDetailsServiceImpl implements UserDetailsService {
 
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
-            return List.of((GrantedAuthority) () -> user.getRole().name());
+            return List.of();
         }
 
         @Override
         public String getPassword() {
-            return user.getPassword();
+            return null;
         }
 
         @Override

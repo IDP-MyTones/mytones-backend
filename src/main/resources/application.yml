@@ -3,12 +3,6 @@ spring:
     multipart:
       max-file-size: 118MB
       max-request-size: 118MB
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-      settings.trace: false
-      settings.web-allow-others: false
   datasource:
     driverClassName: org.h2.Driver
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;
@@ -23,21 +17,22 @@ spring:
       connection-timeout: 300000
   jpa:
     open-in-view: false
-    database: H2
-    database_platform: org.hibernate.dialect.H2Dialect
+    database: postgresql
+    database_platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate.ddl-auto: update
     properties:
       hibernate.format_sql: false           # optional - enable SQL statements formatting.
       hibernate.generate_statistics: false  # optional - generate statistics to check if L2/query cache is actually being used.
-#      hibernate.cache.use_second_level_cache: true  # required - turn on L2 cache.
-#      hibernate.cache.use_query_cache: true         # optional - turn on query cache.
-#      hibernate.cache.use_structured_entries: false # store data in the second-level cache in a more human-friendly format
-#      hibernate.cache.region.factory_class: org.redisson.hibernate.RedissonRegionFactory    # classpath to cache region factory.
-#      hibernate.cache.redisson.fallback: true       # Redisson can fallback on database if Redis cache is unavailable
-#      hibernate.cache.redisson.config: redisson.yaml
-#      hibernate.cache.redisson.entity.eviction.max_entries: 10000
-#      hibernate.cache.redisson.entity.expiration.time_to_live: 86400000
-#      hibernate.cache.redisson.entity.expiration.max_idle_time: 86400000
-#      hibernate.cache.keys_factory: default        # https://docs.jboss.org/hibernate/orm/5.1/userguide/html_single/chapters/caching/Caching.html
+      #      hibernate.cache.use_second_level_cache: true  # required - turn on L2 cache.
+      #      hibernate.cache.use_query_cache: true         # optional - turn on query cache.
+      #      hibernate.cache.use_structured_entries: false # store data in the second-level cache in a more human-friendly format
+      #      hibernate.cache.region.factory_class: org.redisson.hibernate.RedissonRegionFactory    # classpath to cache region factory.
+      #      hibernate.cache.redisson.fallback: true       # Redisson can fallback on database if Redis cache is unavailable
+      #      hibernate.cache.redisson.config: redisson.yaml
+      #      hibernate.cache.redisson.entity.eviction.max_entries: 10000
+      #      hibernate.cache.redisson.entity.expiration.time_to_live: 86400000
+      #      hibernate.cache.redisson.entity.expiration.max_idle_time: 86400000
+      #      hibernate.cache.keys_factory: default        # https://docs.jboss.org/hibernate/orm/5.1/userguide/html_single/chapters/caching/Caching.html
       hibernate.jpa.compliance.global_id_generators: false
       hibernate.max_fetch_depth: 3
       hibernate.order_updates: true
@@ -50,15 +45,25 @@ spring:
       hibernate.query.plan_parameter_metadata_max_size: 256
       hibernate.jdbc.batch_versioned_data: true
       hibernate.bytecode.use_reflection_optimizer: true
-#      hibernate:
-#        show_sql: true
   liquibase:
     enabled: false
+server:
+  port: 8080
 
-#logging:
-#  level:
-#    org:
-#      hibernate:
-#        SQL: INFO
+---
 
+spring:
+  profiles:
+    active: develop
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_URL}/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  jpa:
+    database: postgresql
+    database_platform: org.hibernate.dialect.PostgreSQLDialect
 
+---
+mytones:
+  auth.url: ${AUTH_SERVER_URL}

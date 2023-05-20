@@ -1,6 +1,5 @@
 package com.mytones.core.security;
 
-import com.mytones.core.domain.user.Role;
 import com.mytones.core.domain.user.User;
 import com.mytones.core.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +30,7 @@ public class CurrentUserHolder {
     }
 
     public boolean isAdmin() {
-        return SecurityUtils.isCurrentUserInRole(Role.ADMIN.name());
+        return SecurityUtils.isCurrentUserInRole("ADMIN");
     }
 
     private void verifyAuthentication() {
