@@ -18,7 +18,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional
-    public synchronized User createUser(String username, String firstName, String lastName) {
+    public User createUser(String username, String firstName, String lastName) {
         final var user = new User();
         user.setFirstName(firstName);
         user.setLastName(lastName);

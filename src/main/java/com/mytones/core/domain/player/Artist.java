@@ -18,7 +18,7 @@ public class Artist extends AbstractPersistable<Long> {
     @Column(name = "NAME", nullable = false)
     private String name;
 
-    @Column(name = "IMAGE_URL")
+    @Column(name = "IMAGE_URL", columnDefinition = "TEXT")
     private String imageUrl;
 
     @Column(name = "DESCRIPTION", columnDefinition = "TEXT")

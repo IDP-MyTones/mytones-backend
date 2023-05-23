@@ -27,7 +27,7 @@ class TokenValidator {
 
     public TokenValidator(UserRepository userRepository,
                           UserService userService,
-                          @Value("${AUTH_SERVER_URL}") String authServerUrl) {
+                          @Value("${AUTH_SERVER_URL:''}") String authServerUrl) {
         this.userRepository = userRepository;
         this.userService = userService;
         this.authServerUrl = authServerUrl;

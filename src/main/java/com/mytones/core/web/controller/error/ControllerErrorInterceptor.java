@@ -49,6 +49,7 @@ class ControllerErrorInterceptor {
 
     @ExceptionHandler({MultipartException.class, HttpMediaTypeException.class})
     public ResponseEntity<ErrorMessage> handleBadRequest(Exception e, HttpServletRequest request) {
+        log.error("Catched", e);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorMessage(e.getMessage(), request.getRequestURI()));
     }

@@ -1,17 +1,11 @@
 package com.mytones.core.service;
 
-import com.mytones.core.domain.file.ImageFile;
-import com.mytones.core.repository.file.ImageRepository;
 import com.mytones.core.repository.player.AlbumRepository;
 import com.mytones.core.repository.player.TrackRepository;
-import com.mytones.core.storage.FileStore;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 @Service
 @Transactional

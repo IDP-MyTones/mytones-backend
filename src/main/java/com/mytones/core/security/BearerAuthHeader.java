@@ -2,7 +2,7 @@ package com.mytones.core.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 @Getter
 class BearerAuthHeader {

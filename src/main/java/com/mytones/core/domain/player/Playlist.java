@@ -18,7 +18,7 @@ public class Playlist extends AbstractPersistable<Long> {
     @Column(name = "NAME")
     private String name;
 
-    @Column(name = "IMAGE_URL")
+    @Column(name = "IMAGE_URL", columnDefinition = "TEXT")
     private String imageUrl;
 
     @ManyToMany

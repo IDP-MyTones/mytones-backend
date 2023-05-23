@@ -25,7 +25,7 @@ public class Album extends AbstractPersistable<Long> {
 //    @JoinColumn(name = "IMAGE_ID")
 //    private ImageFile image;
 
-    @Column(name = "IMAGE_URL")
+    @Column(name = "IMAGE_URL", columnDefinition = "TEXT")
     private String imageUrl;
 
     @ManyToMany
